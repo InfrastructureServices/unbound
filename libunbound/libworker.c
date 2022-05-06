@@ -549,9 +549,10 @@ libworker_enter_result(struct ub_result* res, sldns_buffer* buf,
 /** fillup fg results */
 static void
 libworker_fillup_fg(struct ctx_query* q, int rcode, sldns_buffer* buf, 
-	enum sec_status s, char* why_bogus, int was_ratelimited)
+	enum sec_status s, char* why_bogus)
 {
-	q->res->was_ratelimited = was_ratelimited;
+	q->res->was_ratelimited = RCODE_IS_RATELIMITED(rcode);
+	rcode = RCODE_NOT_RATELIMITED(rcode);
 	if(why_bogus)
 		q->res->why_bogus = strdup(why_bogus);
 	if(rcode != 0) {
@@ -575,13 +576,13 @@ libworker_fillup_fg(struct ctx_query* q, int rcode, sldns_buffer* buf,
 
 void
 libworker_fg_done_cb(void* arg, int rcode, sldns_buffer* buf, enum sec_status s,
-	char* why_bogus, int was_ratelimited)
+	char* why_bogus)
 {
 	struct ctx_query* q = (struct ctx_query*)arg;
 	/* fg query is done; exit comm base */
 	comm_base_exit(q->w->base);
 
-	libworker_fillup_fg(q, rcode, buf, s, why_bogus, was_ratelimited);
+	libworker_fillup_fg(q, rcode, buf, s, why_bogus);
 }
 
 /** setup qinfo and edns */
@@ -634,7 +635,7 @@ int libworker_fg(struct ub_ctx* ctx, struct ctx_query* q)
 		NULL, 0, NULL, 0, NULL)) {
 		regional_free_all(w->env->scratch);
 		libworker_fillup_fg(q, LDNS_RCODE_NOERROR, 
-			w->back->udp_buff, sec_status_insecure, NULL, 0);
+			w->back->udp_buff, sec_status_insecure, NULL);
 		libworker_delete(w);
 		free(qinfo.qname);
 		return UB_NOERROR;
@@ -643,7 +644,7 @@ int libworker_fg(struct ub_ctx* ctx, struct ctx_query* q)
 		w->env, &qinfo, &edns, NULL, w->back->udp_buff, w->env->scratch)) {
 		regional_free_all(w->env->scratch);
 		libworker_fillup_fg(q, LDNS_RCODE_NOERROR, 
-			w->back->udp_buff, sec_status_insecure, NULL, 0);
+			w->back->udp_buff, sec_status_insecure, NULL);
 		libworker_delete(w);
 		free(qinfo.qname);
 		return UB_NOERROR;
@@ -665,7 +666,7 @@ int libworker_fg(struct ub_ctx* ctx, struct ctx_query* q)
 
 void
 libworker_event_done_cb(void* arg, int rcode, sldns_buffer* buf,
-	enum sec_status s, char* why_bogus, int was_ratelimited)
+	enum sec_status s, char* why_bogus)
 {
 	struct ctx_query* q = (struct ctx_query*)arg;
 	ub_event_callback_type cb = q->cb_event;
@@ -688,7 +689,7 @@ libworker_event_done_cb(void* arg, int rcode, sldns_buffer* buf,
 		else if(s == sec_status_secure)
 			sec = 2;
 		(*cb)(cb_arg, rcode, (buf?(void*)sldns_buffer_begin(buf):NULL),
-			(buf?(int)sldns_buffer_limit(buf):0), sec, why_bogus, was_ratelimited);
+			(buf?(int)sldns_buffer_limit(buf):0), sec, why_bogus);
 	}
 }
 
@@ -715,7 +716,7 @@ int libworker_attach_mesh(struct ub_ctx* ctx, struct ctx_query* q,
 		regional_free_all(w->env->scratch);
 		free(qinfo.qname);
 		libworker_event_done_cb(q, LDNS_RCODE_NOERROR,
-			w->back->udp_buff, sec_status_insecure, NULL, 0);
+			w->back->udp_buff, sec_status_insecure, NULL);
 		return UB_NOERROR;
 	}
 	if(ctx->env->auth_zones && auth_zones_answer(ctx->env->auth_zones,
@@ -723,7 +724,7 @@ int libworker_attach_mesh(struct ub_ctx* ctx, struct ctx_query* q,
 		regional_free_all(w->env->scratch);
 		free(qinfo.qname);
 		libworker_event_done_cb(q, LDNS_RCODE_NOERROR,
-			w->back->udp_buff, sec_status_insecure, NULL, 0);
+			w->back->udp_buff, sec_status_insecure, NULL);
 		return UB_NOERROR;
 	}
 	/* process new query */
@@ -788,12 +789,23 @@ add_bg_result(struct libworker* w, struct ctx_query* q, sldns_buffer* pkt,
 	}
 }
 
+
+void
+libworker_bg_done_cb_compat(void* arg, int rcode, sldns_buffer* buf, enum sec_status s,
+	char* why_bogus)
+{
+	rcode = RCODE_NOT_RATELIMITED(rcode);
+	libworker_bg_done_cb(arg, rcode, buf, s, why_bogus);
+}
+
 void
 libworker_bg_done_cb(void* arg, int rcode, sldns_buffer* buf, enum sec_status s,
-	char* why_bogus, int was_ratelimited)
+	char* why_bogus)
 {
+	int was_ratelimited = RCODE_IS_RATELIMITED(rcode);
 	struct ctx_query* q = (struct ctx_query*)arg;
 
+	rcode = RCODE_NOT_RATELIMITED(rcode);
 	if(q->cancelled || q->w->back->want_to_quit) {
 		if(q->w->is_bg_thread) {
 			/* delete it now */

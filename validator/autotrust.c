@@ -2336,7 +2336,7 @@ autr_debug_print(struct val_anchors* anchors)
 
 void probe_answer_cb(void* arg, int ATTR_UNUSED(rcode), 
 	sldns_buffer* ATTR_UNUSED(buf), enum sec_status ATTR_UNUSED(sec),
-	char* ATTR_UNUSED(why_bogus), int ATTR_UNUSED(was_ratelimited))
+	char* ATTR_UNUSED(why_bogus))
 {
 	/* retry was set before the query was done,
 	 * re-querytime is set when query succeeded, but that may not
