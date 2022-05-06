@@ -113,8 +113,6 @@ struct daemon {
 	struct module_stack mods;
 	/** access control, which client IPs are allowed to connect */
 	struct acl_list* acl;
-	/** TCP connection limit, limit connections from client IPs */
-	struct tcl_list* tcl;
 	/** local authority zones */
 	struct local_zones* local_zones;
 	/** last time of statistics printout */
@@ -134,6 +132,8 @@ struct daemon {
 	int use_response_ip;
 	/** some RPZ policies are configured */
 	int use_rpz;
+	/** TCP connection limit, limit connections from client IPs */
+	struct tcl_list* tcl;
 #ifdef USE_DNSCRYPT
 	/** the dnscrypt environment */
 	struct dnsc_env* dnscenv;
