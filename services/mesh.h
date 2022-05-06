@@ -234,13 +234,20 @@ struct mesh_reply {
 	struct http2_stream* h2_stream;
 };
 
+/* RHEL 8 compatibility layer.
+ * Special rcode to send was_ratelimited to callback without adding
+ * extra parameter. It is ORed to the rcode parameter of the callback. */
+#define LDNS_RCODE_RATELIMITED 0x100
+#define RCODE_IS_RATELIMITED(rcode) ((rcode & LDNS_RCODE_RATELIMITED) != 0)
+#define RCODE_NOT_RATELIMITED(rcode) (rcode & ~LDNS_RCODE_RATELIMITED)
+
 /** 
  * Mesh result callback func.
  * called as func(cb_arg, rcode, buffer_with_reply, security, why_bogus,
  *		was_ratelimited);
  */
 typedef void (*mesh_cb_func_type)(void* cb_arg, int rcode, struct sldns_buffer*,
-	enum sec_status, char* why_bogus, int was_ratelimited);
+	enum sec_status, char* why_bogus);
 
 /**
  * Callback to result routine

@@ -5654,8 +5654,7 @@ xfr_master_add_addrs(struct auth_master* m, struct ub_packed_rrset_key* rrset,
 
 /** callback for task_transfer lookup of host name, of A or AAAA */
 void auth_xfer_transfer_lookup_callback(void* arg, int rcode, sldns_buffer* buf,
-	enum sec_status ATTR_UNUSED(sec), char* ATTR_UNUSED(why_bogus),
-	int ATTR_UNUSED(was_ratelimited))
+	enum sec_status ATTR_UNUSED(sec), char* ATTR_UNUSED(why_bogus))
 {
 	struct auth_xfer* xfr = (struct auth_xfer*)arg;
 	struct module_env* env;
@@ -5667,6 +5666,7 @@ void auth_xfer_transfer_lookup_callback(void* arg, int rcode, sldns_buffer* buf,
 		return; /* stop on quit */
 	}
 
+	rcode = RCODE_NOT_RATELIMITED(rcode);
 	/* process result */
 	if(rcode == LDNS_RCODE_NOERROR) {
 		uint16_t wanted_qtype = LDNS_RR_TYPE_A;
@@ -6715,8 +6715,7 @@ xfr_probe_send_or_end(struct auth_xfer* xfr, struct module_env* env)
 
 /** callback for task_probe lookup of host name, of A or AAAA */
 void auth_xfer_probe_lookup_callback(void* arg, int rcode, sldns_buffer* buf,
-	enum sec_status ATTR_UNUSED(sec), char* ATTR_UNUSED(why_bogus),
-	int ATTR_UNUSED(was_ratelimited))
+	enum sec_status ATTR_UNUSED(sec), char* ATTR_UNUSED(why_bogus))
 {
 	struct auth_xfer* xfr = (struct auth_xfer*)arg;
 	struct module_env* env;
@@ -6728,6 +6727,7 @@ void auth_xfer_probe_lookup_callback(void* arg, int rcode, sldns_buffer* buf,
 		return; /* stop on quit */
 	}
 
+	rcode = RCODE_NOT_RATELIMITED(rcode);
 	/* process result */
 	if(rcode == LDNS_RCODE_NOERROR) {
 		uint16_t wanted_qtype = LDNS_RR_TYPE_A;
@@ -8211,7 +8211,7 @@ auth_zone_verify_zonemd_key_with_ds(struct auth_zone* z,
 
 /** callback for ZONEMD lookup of DNSKEY */
 void auth_zonemd_dnskey_lookup_callback(void* arg, int rcode, sldns_buffer* buf,
-	enum sec_status sec, char* why_bogus, int ATTR_UNUSED(was_ratelimited))
+	enum sec_status sec, char* why_bogus)
 {
 	struct auth_zone* z = (struct auth_zone*)arg;
 	struct module_env* env;
@@ -8233,6 +8233,7 @@ void auth_zonemd_dnskey_lookup_callback(void* arg, int rcode, sldns_buffer* buf,
 	if(z->zonemd_callback_qtype == LDNS_RR_TYPE_DS)
 		typestr = "DS";
 	downprot = env->cfg->harden_algo_downgrade;
+	rcode = RCODE_NOT_RATELIMITED(rcode);
 
 	/* process result */
 	if(sec == sec_status_bogus) {

@@ -204,17 +204,18 @@ struct ub_result {
 	char* why_bogus;
 
 	/**
-	 * If the query or one of its subqueries was ratelimited.  Useful if
-	 * ratelimiting is enabled and answer to the client is SERVFAIL as a
-	 * result.
-	 */
-	int was_ratelimited;
-
-	/**
 	 * TTL for the result, in seconds.  If the security is bogus, then
 	 * you also cannot trust this value.
 	 */
 	int ttl;
+
+	/**
+	 * If the query or one of its subqueries was ratelimited.  Useful if
+	 * ratelimiting is enabled and answer to the client is SERVFAIL as a
+	 * result.
+	 * RHEL8 Change, moved after ttl.
+	 */
+	int was_ratelimited;
 };
 
 /**

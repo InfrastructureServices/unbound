@@ -63,6 +63,7 @@
 #include "util/data/dname.h"
 #include "respip/respip.h"
 #include "services/listen_dnsport.h"
+#include "libunbound/unbound-event.h"
 
 /** subtract timers and the values do not overflow or become negative */
 static void
@@ -901,7 +902,7 @@ mesh_state_cleanup(struct mesh_state* mstate)
 			mstate->cb_list = cb->next;
 			fptr_ok(fptr_whitelist_mesh_cb(cb->cb));
 			(*cb->cb)(cb->cb_arg, LDNS_RCODE_SERVFAIL, NULL,
-				sec_status_unchecked, NULL, 0);
+				sec_status_unchecked, NULL);
 			log_assert(mesh->num_reply_addrs > 0);
 			mesh->num_reply_addrs--;
 		}
@@ -1157,8 +1158,9 @@ mesh_do_callback(struct mesh_state* m, int rcode, struct reply_info* rep,
 					r->edns.opt_list_inplace_cb_out = NULL;
 		}
 		fptr_ok(fptr_whitelist_mesh_cb(r->cb));
-		(*r->cb)(r->cb_arg, rcode, r->buf, sec_status_unchecked, NULL,
-			was_ratelimited);
+		if (was_ratelimited)
+			rcode |= LDNS_RCODE_RATELIMITED;
+		(*r->cb)(r->cb_arg, rcode, r->buf, sec_status_unchecked, NULL);
 	} else {
 		size_t udp_size = r->edns.udp_size;
 		sldns_buffer_clear(r->buf);
@@ -1176,11 +1178,14 @@ mesh_do_callback(struct mesh_state* m, int rcode, struct reply_info* rep,
 		{
 			fptr_ok(fptr_whitelist_mesh_cb(r->cb));
 			(*r->cb)(r->cb_arg, LDNS_RCODE_SERVFAIL, r->buf,
-				sec_status_unchecked, NULL, 0);
+				sec_status_unchecked, NULL);
 		} else {
 			fptr_ok(fptr_whitelist_mesh_cb(r->cb));
-			(*r->cb)(r->cb_arg, LDNS_RCODE_NOERROR, r->buf,
-				rep->security, reason, was_ratelimited);
+			rcode = LDNS_RCODE_NOERROR;
+			if (was_ratelimited)
+				rcode |= LDNS_RCODE_RATELIMITED;
+			(*r->cb)(r->cb_arg, rcode, r->buf,
+				rep->security, reason);
 		}
 	}
 	free(reason);

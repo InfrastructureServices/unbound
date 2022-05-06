@@ -690,12 +690,10 @@ void auth_xfer_probe_timer_callback(void* arg);
 void auth_xfer_transfer_timer_callback(void* arg);
 /** mesh callback for task_probe on lookup of host names */
 void auth_xfer_probe_lookup_callback(void* arg, int rcode,
-	struct sldns_buffer* buf, enum sec_status sec, char* why_bogus,
-	int was_ratelimited);
+	struct sldns_buffer* buf, enum sec_status sec, char* why_bogus);
 /** mesh callback for task_transfer on lookup of host names */
 void auth_xfer_transfer_lookup_callback(void* arg, int rcode,
-	struct sldns_buffer* buf, enum sec_status sec, char* why_bogus,
-	int was_ratelimited);
+	struct sldns_buffer* buf, enum sec_status sec, char* why_bogus);
 
 /*
  * Compares two 32-bit serial numbers as defined in RFC1982.  Returns
@@ -774,8 +772,7 @@ void auth_zone_verify_zonemd(struct auth_zone* z, struct module_env* env,
 
 /** mesh callback for zonemd on lookup of dnskey */
 void auth_zonemd_dnskey_lookup_callback(void* arg, int rcode,
-	struct sldns_buffer* buf, enum sec_status sec, char* why_bogus,
-	int was_ratelimited);
+	struct sldns_buffer* buf, enum sec_status sec, char* why_bogus);
 
 /**
  * Check the ZONEMD records that need online DNSSEC chain lookups,
