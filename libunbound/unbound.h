@@ -102,9 +102,16 @@ extern "C" {
 #endif
 
 /** the version of this header file */
-#define UNBOUND_VERSION_MAJOR @UNBOUND_VERSION_MAJOR@
-#define UNBOUND_VERSION_MINOR @UNBOUND_VERSION_MINOR@
-#define UNBOUND_VERSION_MICRO @UNBOUND_VERSION_MICRO@
+/* Because of RHEL compat change, callback type remains at
+ * 1.7.3 version. To prevent source-level incompatibility,
+ * fake still old version. Export real version in _REAL
+ * suffix definitions. */
+#define UNBOUND_VERSION_MAJOR 1
+#define UNBOUND_VERSION_MINOR 7
+#define UNBOUND_VERSION_MICRO @UNBOUND_VERSION_MAJOR@@UNBOUND_VERSION_MINOR@@UNBOUND_VERSION_MICRO@
+#define UNBOUND_VERSION_MAJOR_REAL @UNBOUND_VERSION_MAJOR@
+#define UNBOUND_VERSION_MINOR_REAL @UNBOUND_VERSION_MINOR@
+#define UNBOUND_VERSION_MICRO_REAL @UNBOUND_VERSION_MICRO@
 
 /**
  * The validation context is created to hold the resolver status,
