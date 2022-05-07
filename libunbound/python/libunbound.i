@@ -53,7 +53,7 @@
    #ifdef HAVE_ARPA_INET_H
    #include <arpa/inet.h>
    #endif
-   #include "libunbound/unbound.h"
+   #include "unbound.h"
 %}
 
 %pythoncode %{
@@ -855,7 +855,7 @@ Result: ['74.125.43.147', '74.125.43.99', '74.125.43.103', '74.125.43.104']
   //printf("resolve_stop()\n");
 %} 
 
-%include "libunbound/unbound.h"
+%include "unbound.h"
 
 %inline %{
   //SWIG will see the ub_ctx as a class

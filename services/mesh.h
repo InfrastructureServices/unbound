@@ -237,7 +237,7 @@ struct mesh_reply {
 /* RHEL 8 compatibility layer.
  * Special rcode to send was_ratelimited to callback without adding
  * extra parameter. It is ORed to the rcode parameter of the callback. */
-#define LDNS_RCODE_RATELIMITED 0x100
+#define LDNS_RCODE_RATELIMITED 0xf80
 #define RCODE_IS_RATELIMITED(rcode) ((rcode & LDNS_RCODE_RATELIMITED) != 0)
 #define RCODE_NOT_RATELIMITED(rcode) (rcode & ~LDNS_RCODE_RATELIMITED)
 
