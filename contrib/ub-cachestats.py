@@ -37,10 +37,10 @@ for line in stats.stdout.splitlines():
     elif key == b'mem.cache.message':
         m = float(ub_getval('msg-cache-size'))
         print_kv(key, val, m)
-    elif key == b'mem.http.query_buffer':
+    elif key == b'mem.http.query_buffer' and val != b'0':
         m = float(ub_getval('http-query-buffer-size'))
         print_kv(key, val, m)
-    elif key == b'mem.http.response_buffer':
+    elif key == b'mem.http.response_buffer' and val != b'0':
         m = float(ub_getval('http-response-buffer-size'))
         print_kv(key, val, m)
     else:
