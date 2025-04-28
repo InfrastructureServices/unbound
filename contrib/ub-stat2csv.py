@@ -35,10 +35,10 @@ def get_pid(command):
 
 def get_mem(pid, values):
     cmd = subprocess.run(["ps", "-o", "vsz=,rss=,%mem=", str(pid)], capture_output=True)
-    line = cmd.stdout.strip().split(b" ")
+    line = cmd.stdout.strip().split()
     values["vsz"] = int(line[0])
     values["rss"] = int(line[1])
-    values["%mem"] = float(line[3])
+    values["%mem"] = float(line[2])
 
 def process_stats(values = {}):
     stats = subprocess.run(["unbound-control", "stats_noreset"], capture_output=True)
