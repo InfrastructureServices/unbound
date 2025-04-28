@@ -55,7 +55,7 @@ def process_stats(values = {}):
 
 
 if len(sys.argv) > 1:
-    output = fopen(sys.argv[1], "w")
+    output = open(sys.argv[1], "w")
 else:
     output = sys.stdout
 
