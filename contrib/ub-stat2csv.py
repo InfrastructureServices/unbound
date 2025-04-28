@@ -34,11 +34,11 @@ def get_pid(command):
     return int(cmd.stdout.strip())
 
 def get_mem(pid, values):
-    cmd = subprocess.run(["ps", "-o", "vsz=,rss=", str(pid)], capture_output=True)
+    cmd = subprocess.run(["ps", "-o", "vsz=,rss=,%mem=", str(pid)], capture_output=True)
     line = cmd.stdout.strip().split(b" ")
     values["vsz"] = int(line[0])
     values["rss"] = int(line[1])
-    return (int(line[0]), int(line[1]))
+    values["%mem"] = float(line[3])
 
 def process_stats(values = {}):
     stats = subprocess.run(["unbound-control", "stats_noreset"], capture_output=True)
@@ -59,7 +59,7 @@ if len(sys.argv) > 1:
 else:
     output = sys.stdout
 
-interval = 3
+interval = 15
 
 pid = get_pid("unbound")
 
