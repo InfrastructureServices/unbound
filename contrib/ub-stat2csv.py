@@ -69,8 +69,15 @@ get_mem(pid, values)
 
 writer = csv.writer(output, dialect=csv.excel, quoting=csv.QUOTE_NONNUMERIC)
 writer.writerow(values.keys())
-while True:
-    get_mem(pid, values)
-    writer.writerow(values.values())
-    output.flush()
-    time.sleep(interval)
+
+try:
+    while True:
+        get_mem(pid, values)
+        process_stats(values)
+        writer.writerow(values.values())
+        output.flush()
+        time.sleep(interval)
+except KeyboardInterrupt:
+    pass
+
+output.close()
