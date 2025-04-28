@@ -72,4 +72,5 @@ writer.writerow(values.keys())
 while True:
     get_mem(pid, values)
     writer.writerow(values.values())
+    output.flush()
     time.sleep(interval)
